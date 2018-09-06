@@ -1,0 +1,192 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ClassLibrary1
+{
+    public class PlayerData
+
+    {
+        private static string fileName = @"X:\data\players.txt";
+
+        public Dictionary<string, string[]> getPlayersInDict()
+        {
+            var playerDict = new Dictionary<string, string[]>();
+
+            try
+            {
+                // Create an instance of StreamReader to read from a file.
+                // The using statement also closes the StreamReader.
+
+                using (StreamReader sr = new StreamReader(fileName))
+                {
+                    string line;
+
+                    // Read and display lines from the file until the end of 
+                    // the file is reached.
+
+                    // unstring comma delimited data into a array of strings 
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+
+                        string[] playerFull = new string[4];
+                        playerFull = line.Split(',');
+
+                        // drop first element of array (key) leave data fields in an array
+
+                        string[] playerDets = new string[3];
+                        playerDets = playerFull.Skip(1).ToArray();
+
+                        playerDict.Add(playerFull[0], playerDets);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Let the user know what went wrong.
+
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(ex.Message);
+            }
+
+            return playerDict;
+        }
+
+        public List<Player> getPlayersInList()
+        {
+            List<Player> playerList = new List<Player>();
+
+            try
+            {
+                // Create an instance of StreamReader to read from a file.
+                // The using statement also closes the StreamReader.
+
+                using (StreamReader sr = new StreamReader(fileName))
+                {
+                    string line;
+
+                    // Read and display lines from the file until the end of 
+                    // the file is reached.
+
+                    // unstring comma delimited data into a array of strings 
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+
+                        string[] playerFields = new string[4];
+                        playerFields = line.Split(',');
+
+                        playerList.Add(new Player() { Nickname = playerFields[0], Surname = playerFields[1], Forename = playerFields[2], Handicap = playerFields[3] });  
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Let the user know what went wrong.
+
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(ex.Message);
+            }
+
+            return playerList;
+
+        }
+
+
+        public void RefreshPlayers(Dictionary<string, string[]> playerDict)
+        {
+            //rename file with current timestamp
+
+            try
+            {
+                int index = fileName.IndexOf(".");
+                var newFileName = fileName.Substring(0, index) + "_" + DateTime.Now.ToString("yyyyMMdd_HHmm_ssfff") + fileName.Substring(index);
+
+                File.Move(fileName, newFileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("The file could not be renamed/moved:");
+                Console.WriteLine(ex.Message);
+            }
+
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(fileName))
+                {
+                    foreach (KeyValuePair<string, string[]> keyValue in playerDict)
+                    {
+                        var playerRec = keyValue.Key + "," + string.Join(",", keyValue.Value);
+
+                        sw.WriteLine(playerRec);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("The file could not be refreshed/rewritten:");
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+
+        public void updatePlayer(string Nickname, string Surname, string Forename, string Handicap)
+        {
+            try
+            {
+                // Create an instance of StreamReader to read from a file.
+                // The using statement also closes the StreamReader.
+
+                using (StreamReader sr = new StreamReader(fileName))
+                {
+                    string line;
+
+                    // Read and display lines from the file until the end of 
+                    // the file is reached.
+
+                    // unstring comma delimited data into a array of strings 
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+
+                        string[] playerFields = new string[4];
+                        playerFields = line.Split(',');
+
+                        if (Nickname == playerFields[0])
+                        {
+                            if ((Surname == playerFields[1]) && (Forename == playerFields[2]) && (Handicap == playerFields[3]))
+                            {
+                                Console.WriteLine(Nickname + " ... No change, no update");
+                            }
+                            else
+                            {
+                                Console.WriteLine(Nickname + " ... updated");
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Key : " + Nickname + " : " + playerFields[0] + " ... read & ignored");
+                        }
+                        ;
+                        
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Let the user know what went wrong.
+
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+    }
+}
